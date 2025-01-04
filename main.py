@@ -2,6 +2,17 @@ from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from utils import validate_file, upload_to_bucket, circuit_breaker
 from vision_utils import is_invoice_or_receipt  
+import googlecloudprofiler
+
+# Inicialización de Cloud Profiler
+try:
+    googlecloudprofiler.start(
+        service="encript-document",  # Nombre del servicio
+        service_version="1.0.0",     # Versión del servicio
+        verbose=3                    # Nivel de log: 0-Error, 1-Warning, 2-Info, 3-Debug
+    )
+except (ValueError, NotImplementedError) as exc:
+    print(f"Error inicializando Cloud Profiler: {exc}")
 
 # Inicialización de Flask
 app = Flask("internal")

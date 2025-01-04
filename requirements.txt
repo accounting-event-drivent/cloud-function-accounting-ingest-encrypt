@@ -8,3 +8,4 @@ python-dotenv
 tenacity
 cryptography
 flask-cors
+google-cloud-profiler
