@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify, Response
+from flask_cors import CORS 
 from utils import validate_file, upload_to_bucket, get_secret, circuit_breaker
 
 # Inicialización de Flask
 app = Flask("internal")
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.after_request
 def add_security_headers(response):
@@ -20,14 +22,25 @@ def handle_upload():
         filename = upload_to_bucket(file)
         secret_payload = get_secret()
         return jsonify({
-            "message": f"Archivo subido y cifrado exitosamente: {filename}"
+            "success": True,
+            "message": f"Archivo subido y cifrado exitosamente: {filename}",
+            "filename": filename
         }), 200
     except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 400
     except RuntimeError as e:
-        return jsonify({"error": str(e)}), 503
-    except Exception:
-        return jsonify({"error": "Error interno del servidor"}), 500
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 503
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": "Error interno del servidor"
+        }), 500
 
 @app.route("/api/v1/status", methods=["HEAD"])
 def check_status():
@@ -56,7 +69,10 @@ def main(request):
         internal_ctx.push()
         response = app.full_dispatch_request()
     except Exception:
-        response = jsonify({"error": "Error interno del servidor"}), 500
+        response = jsonify({
+            "success": False,
+            "error": "Error interno del servidor"
+        }), 500
     finally:
         internal_ctx.pop()
 
