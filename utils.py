@@ -56,12 +56,13 @@ def encrypt_file(file):
     return encrypted_data
 
 # Subida de archivos encriptados
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
 def upload_to_bucket(file):
     """Encripta y sube un archivo al bucket de Google Cloud Storage."""
     bucket = storage_client.bucket(BUCKET_NAME)
-    blob_name = f"{BUCKET_FOLDER_NAME}/{file.filename}"
-    blob = bucket.blob(blob_name)
+    # Utiliza únicamente el nombre del archivo
+    blob_name = file.filename  
+    full_blob_path = f"{BUCKET_FOLDER_NAME}/{blob_name}"
+    blob = bucket.blob(full_blob_path)
 
     # Encriptar el archivo antes de subir
     encrypted_data = encrypt_file(file)
