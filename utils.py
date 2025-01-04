@@ -17,7 +17,7 @@ BUCKET_FOLDER_NAME  = os.getenv("BUCKET_FOLDER_NAME", "ingesta")
 KEY_NAME            = os.getenv("KEY_NAME", "accounting-client-key")
 SECRET_VERSION      = os.getenv("SECRET_VERSION", "latest")
 PROJECT_ID          = os.getenv("PROJECT_ID")
-ALLOWED_EXTENSIONS  = {"png", "jpg", "jpeg"}
+ALLOWED_EXTENSIONS  = {"png", "jpg", "jpeg", "webp"}
 MAX_FILE_SIZE       = 5 * 1024 * 1024  
 
 # Clientes de Google Cloud

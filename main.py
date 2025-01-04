@@ -1,10 +1,37 @@
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS 
+from google.cloud import vision
 from utils import validate_file, upload_to_bucket, get_secret, circuit_breaker
 
 # Inicialización de Flask
 app = Flask("internal")
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+# Cliente de Vision API
+vision_client = vision.ImageAnnotatorClient()
+
+def is_invoice_or_receipt(file):
+    """Verifica si el archivo contiene texto relacionado con facturas o recibos."""
+    content = file.read()
+    file.seek(0)  # Resetear el puntero del archivo después de leerlo
+    image = vision.Image(content=content)
+    response = vision_client.text_detection(image=image)
+
+    if response.error.message:
+        raise RuntimeError(f"Error en Vision API: {response.error.message}")
+
+    # Extraer texto detectado
+    text_annotations = response.text_annotations
+    if not text_annotations:
+        return False
+
+    detected_text = text_annotations[0].description.lower()
+    # Verificar palabras clave
+    keywords = ["factura", "recibo", "invoice", "receipt"]
+    if any(keyword in detected_text for keyword in keywords):
+        return True
+
+    return False
 
 @app.after_request
 def add_security_headers(response):
@@ -19,13 +46,21 @@ def handle_upload():
     try:
         file = request.files.get("file")
         validate_file(file)
+
+        # Validar si es factura o recibo
+        if not is_invoice_or_receipt(file):
+            return jsonify({
+                "success": False,
+                "error": "El archivo no parece ser una factura o recibo."
+            }), 400
+
         filename = upload_to_bucket(file)
-        secret_payload = get_secret()
         return jsonify({
             "success": True,
             "message": f"Archivo subido y cifrado exitosamente: {filename}",
             "filename": filename
         }), 200
+
     except ValueError as e:
         return jsonify({
             "success": False,
@@ -77,3 +112,4 @@ def main(request):
         internal_ctx.pop()
 
     return response
+

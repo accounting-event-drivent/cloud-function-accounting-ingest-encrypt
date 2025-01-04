@@ -3,6 +3,7 @@ google-cloud-storage
 google-cloud-secret-manager
 google-cloud-logging
 google-cloud-trace
+google-cloud-vision
 python-dotenv
 tenacity
 cryptography
