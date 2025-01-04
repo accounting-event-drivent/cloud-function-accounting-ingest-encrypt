@@ -1,0 +1,8 @@
+flask
+google-cloud-storage
+google-cloud-secret-manager
+google-cloud-logging
+google-cloud-trace
+python-dotenv
+tenacity
+cryptography
