@@ -1,0 +1,31 @@
+steps:
+  # Paso 1: Desplegar la función
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    entrypoint: "gcloud"
+    args:
+      - "functions"
+      - "deploy"
+      - "encript-document"  
+      - "--set-env-vars"
+      - "BUCKET_NAME=${_BUCKET_NAME},PROJECT_ID=${_PROJECT_ID},BUCKET_FOLDER_NAME=${_BUCKET_FOLDER_NAME},KEY_NAME=${_KEY_NAME},SECRET_VERSION=${_SECRET_VERSION}"
+      - "--region=${_REGION}"
+      - "--runtime=python310"
+      - "--trigger-http"
+      - "--allow-unauthenticated"
+      - "--entry-point=main"
+      - "--max-instances=3"
+      - "--memory=128MB"
+      - "--timeout=30s"
+      - "--labels=env=${_ENVIRONMENT},team=devops, author=jose_reynoso"
+
+timeout: "1200s" # Tiempo máximo (20 minutos) para completar el build
+
+# Sustituciones para los valores de las variables
+substitutions:
+  _BUCKET_NAME: "accounting-project-1-storage"
+  _PROJECT_ID: "siman-test-project"
+  _BUCKET_FOLDER_NAME: "ingesta"
+  _KEY_NAME: "accounting-client-key"
+  _SECRET_VERSION: "latest"
+  _REGION: "us-east1"
+  _ENV: "dev"
